@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/header.svg" alt="Hi, I'm Rana. Teaching neural networks to predict wireless channels." width="100%"/>
+  <img src="./header.svg" alt="Hi, I'm Rana. Teaching neural networks to predict wireless channels." width="100%"/>
 </p>
 
 <!-- Add your intro, Currently section, and pinned-project notes here -->
