@@ -20,3 +20,6 @@
 <p align="center">
   <img src="https://readme-jokes.vercel.app/api?theme=tokyonight" alt="Random dev joke"/>
 </p>
+
+<!-- SUDOKU:START -->
+<!-- SUDOKU:END -->
