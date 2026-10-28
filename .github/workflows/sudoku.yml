@@ -1,0 +1,57 @@
+name: Sudoku
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:      # run manually to start a new puzzle
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: sudoku           # handle one move at a time
+  cancel-in-progress: false
+
+jobs:
+  play:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.issue.title, 'sudoku|')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Start a new puzzle
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          REPO: ${{ github.repository }}
+        run: python sudoku/game.py new
+
+      - name: Play the move
+        if: github.event_name == 'issues'
+        env:
+          REPO: ${{ github.repository }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_USER: ${{ github.event.issue.user.login }}
+          REPLY_FILE: ${{ runner.temp }}/reply.md
+        run: python sudoku/game.py move
+
+      - name: Commit the new board
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md sudoku/
+          git diff --cached --quiet || git commit -m "sudoku: update board"
+          git push
+
+      - name: Reply and close the issue
+        if: github.event_name == 'issues'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh issue comment "$NUMBER" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/reply.md"
+          gh issue close "$NUMBER" --repo "$GITHUB_REPOSITORY"
